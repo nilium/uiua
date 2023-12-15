@@ -598,6 +598,7 @@ enum App {
     },
     #[clap(about = "Format a uiua file or all files in the current directory")]
     Fmt {
+        /// The file or directory to format. Pass "-" to format standard input (implies --to-stdout).
         path: Option<PathBuf>,
         #[clap(flatten)]
         formatter_options: FormatterOptions,
@@ -776,6 +777,7 @@ fn update(main: bool, check: bool) {
 }
 
 fn format_single_file(path: PathBuf, config: &FormatConfig, stdout: bool) -> Result<(), UiuaError> {
+    let stdout = stdout || path.to_str().eq(&Some("-"));
     let output = format_file(path, config, stdout)?.output;
     if stdout {
         println!("{output}");

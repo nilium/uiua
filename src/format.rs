@@ -5,6 +5,7 @@ use std::{
     env,
     fmt::Display,
     fs,
+    io::{read_to_string, stdin},
     iter::repeat,
     path::{Path, PathBuf},
     sync::Arc,
@@ -368,8 +369,12 @@ pub fn format_file<P: AsRef<Path>>(
     dont_write: bool,
 ) -> UiuaResult<FormatOutput> {
     let path = path.as_ref();
-    let input =
-        fs::read_to_string(path).map_err(|e| UiuaError::Load(path.to_path_buf(), e.into()))?;
+    let input = if path.to_str().eq(&Some("-")) {
+        read_to_string(stdin())
+    } else {
+        fs::read_to_string(path)
+    }
+    .map_err(|e| UiuaError::Load(path.to_path_buf(), e.into()))?;
     let formatted = format(&input, path, config)?;
     if formatted.output == input {
         return Ok(formatted);
